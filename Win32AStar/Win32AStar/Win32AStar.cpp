@@ -372,6 +372,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		MarkerEnd = true;
 		break;
 	case WM_DESTROY:
+		DeleteObject (Start);	//GREEN
+		DeleteObject (End);		//RED
+		DeleteObject (block);	//Gray
+		DeleteObject (Open);	//BLUE
+		DeleteObject (Close);	//YELLOW
+
+		DeleteObject (PEN);
+		DeleteObject (RED);
+		DeleteObject (OldBrush);
+		DeleteObject (OldPEN);
 		KillTimer (hWnd,0);
         PostQuitMessage(0);
         break;
