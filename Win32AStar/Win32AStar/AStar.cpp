@@ -18,11 +18,11 @@ void AStar::GetMapTileSet (int PosX, int PosY, Tile Name)
 	TileNumX = PosX / TileSize;
 	TileNumY = PosY / TileSize;
 
-	if ( TileNumX < 0 || TileNumX > MaxMapX )
+	if ( TileNumX <= 0 || TileNumX > MaxMapX )
 	{
 		return;
 	}
-	if ( TileNumY < 0 || TileNumY > MaxMapY )
+	if ( TileNumY <= 0 || TileNumY > MaxMapY )
 	{
 		return;
 	}
@@ -165,11 +165,11 @@ void AStar::erase (Node *search)
 void AStar::MakeNode (Node *Parent,int MovePay, int X, int Y)
 {
 	//¸Ê ¾È¹þ¾î³ªµµ·Ï Ã¼Å©
-	if ( X <0 || X >MaxMapX )
+	if ( X < 0 || X > MaxMapX-1 )
 	{
 		return;
 	}
-	if ( Y <0 || Y >MaxMapY )
+	if ( Y < 0 || Y > MaxMapY-1 )
 	{
 		return;
 	}

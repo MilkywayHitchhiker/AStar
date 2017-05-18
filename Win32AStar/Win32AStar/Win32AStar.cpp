@@ -56,16 +56,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // 전역 문자열을 초기화합니다.
 	lstrcpyW (szTitle, L"Astar_Search");//제목 표시줄 텍스트입니다.
 	lstrcpyW (szWindowClass, L"Astar_Main");
-	Start = CreateSolidBrush (RGB (102, 255, 102));	//GREEN
-	End = CreateSolidBrush (RGB (255, 51, 51));	//RED
-	block = CreateSolidBrush (RGB (128, 128, 128));	//Gray
 
-	Open = CreateSolidBrush(RGB(51,153,255));	//BLUE
-	Close = CreateSolidBrush(RGB(255,255,153));	//YELLOW
-
-
-	PEN = CreatePen (PS_SOLID,1,RGB (128, 128, 128));
-	RED = CreatePen (PS_SOLID,2,RGB (255, 51, 51));
     MyRegisterClass(hInstance);
 
     // 응용 프로그램 초기화를 수행합니다.
@@ -175,7 +166,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
 	case WM_CREATE:
-		SetTimer (hWnd, 1, 250, NULL);
+		Start = CreateSolidBrush (RGB (102, 255, 102));	//GREEN
+		End = CreateSolidBrush (RGB (255, 51, 51));	//RED
+		block = CreateSolidBrush (RGB (128, 128, 128));	//Gray
+
+		Open = CreateSolidBrush (RGB (51, 153, 255));	//BLUE
+		Close = CreateSolidBrush (RGB (255, 255, 153));	//YELLOW
+
+
+		PEN = CreatePen (PS_SOLID, 1, RGB (128, 128, 128));
+		RED = CreatePen (PS_SOLID, 2, RGB (255, 51, 51));
+		SetTimer (hWnd, 1, 150, NULL);
 		break;
     case WM_COMMAND:
         {
@@ -326,16 +327,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
 	case WM_LBUTTONDBLCLK:
 		//출발지점 설정
-		StartX = LOWORD (lParam) / TileSize;
-		StartY = HIWORD (lParam) / TileSize;
-		MarkerStart = true;
+		X = LOWORD (lParam) / TileSize;
+		Y = HIWORD (lParam) / TileSize;
+		if ( (X >= 0 && X < MaxMapX) && (Y>= 0 && Y < MaxMapY) )
+		{
+			StartX = X;
+			StartY = Y;
+			MarkerStart = true;
+		}
 		break;
 	case WM_RBUTTONDBLCLK:
 		PathFinding = true;
 		Star.PathFind (StartX, StartY, EndX, EndY, true);
 		break;
 	case WM_LBUTTONDOWN:
-		if ( Map[HIWORD (lParam) / TileSize][LOWORD (lParam)] == BLOCK )
+		if ( Map[HIWORD (lParam) / TileSize][LOWORD (lParam) / TileSize] == BLOCK )
 		{
 			LMouseDOWNCLEAR = true;
 		}
@@ -352,7 +358,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		//좌표를 받아서 맵에 장애물 설치 및 해제
 		X = LOWORD(lParam) / TileSize;
 		Y = HIWORD (lParam) / TileSize;
-		if ( (X > 0 && X < MaxMapX) && (Y>0 && Y<MaxMapY) )
+		if ( (X >= 0 && X < MaxMapX) && (Y>=0 && Y<MaxMapY) )
 		{
 			if ( true == LMouseDOWNBLOCK )
 			{
@@ -367,9 +373,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		
 	case WM_RBUTTONDOWN:
 		//도착지점 설정
-		EndX = LOWORD (lParam) / TileSize;
-		EndY = HIWORD (lParam) / TileSize;
-		MarkerEnd = true;
+		X = LOWORD (lParam) / TileSize;
+		Y = HIWORD (lParam) / TileSize;
+		if ( (X > 0 && X < MaxMapX) && (Y > 0 && Y < MaxMapY) )
+		{
+			EndX = X;
+			EndY = Y;
+			MarkerEnd = true;
+		}
 		break;
 	case WM_DESTROY:
 		DeleteObject (Start);	//GREEN
