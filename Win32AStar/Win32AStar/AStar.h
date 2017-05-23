@@ -17,6 +17,7 @@ extern int Map[MaxMapY][MaxMapX];
 
 
 
+
 class AStar
 {
 public :
@@ -43,7 +44,7 @@ public :
 
 	}
 
-	void GetMapTileSet (int PosX, int PosY, Tile Name = BLOCK);
+	void SetMapBlockSet (int PosX, int PosY, Tile Name = BLOCK);
 
 	Node *PathFind (int StartX, int StartY, int EndX, int EndY,bool First);
 
@@ -73,6 +74,7 @@ private:
 	//부모인자를 받아서 노드 생성
 	void MakeNode (Node *Parent, int MovePay ,int X,int Y);
 };
+
 
 extern AStar::SearchNode OpenList[OpenListNum];
 

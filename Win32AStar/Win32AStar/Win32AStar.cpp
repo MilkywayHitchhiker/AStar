@@ -4,9 +4,15 @@
 #include "stdafx.h"
 #include "Win32AStar.h"
 #include "resource.h"
-#include "AStar.h"
+//#include "AStar.h"
+#include "JPS.h"
 
 #define MAX_LOADSTRING 100
+
+
+#define MaxMapX 64
+#define MaxMapY 40
+#define TileSize 16
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -18,6 +24,7 @@ HBRUSH End;		//RED
 HBRUSH block ;	//Gray
 HBRUSH Open;	//BLUE
 HBRUSH Close;	//YELLOW
+HBRUSH Color;
 
 HPEN PEN;
 HPEN RED;
@@ -28,14 +35,14 @@ bool LMouseDOWNCLEAR;
 bool PathFinding = false;
 bool MarkerStart = false;
 bool MarkerEnd = false;
-AStar::Node *FindEnd;
+JPS::Node *FindEnd;
 
-AStar Star;
+//AStar Star;
 int StartX;
 int StartY;
 int EndX;
 int EndY;
-
+JPS Astar(MaxMapX,MaxMapY);
 
 // 이 코드 모듈에 들어 있는 함수의 정방향 선언입니다.
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -153,8 +160,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 
 
-
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 
@@ -192,7 +197,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
 			case ID_39999:
 				//장애물 지우기 처리
-				memset (Map, 0, sizeof (Map));
 				break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
@@ -205,7 +209,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case 1:
 			if ( PathFinding )
 			{
-				FindEnd = Star.PathFind (StartX, StartY, EndX, EndY, false);
+				FindEnd = Astar.Jump (StartX, StartY, EndX, EndY, false);
 				if ( FindEnd != nullptr )
 				{
 					PathFinding = false;
@@ -238,48 +242,57 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			LineTo (hdc, MaxMapX * TileSize, cnt * TileSize);
 		}
 
-		//BLOCK 출력
 
-		OldBrush = ( HBRUSH )SelectObject (hdc,block);
-		
+		//타일 색칠하기
+
 		for ( int cntY = 0; cntY < MaxMapY; cntY++ )
 		{
 			for ( int cntX = 0; cntX < MaxMapX; cntX++ )
 			{
-				if ( Map[cntY][cntX] == BLOCK )
+				Color = CreateSolidBrush (Astar.Map[cntY][cntX].rgb);
+				( HBRUSH )SelectObject (hdc, Color);
+				Rectangle (hdc, cntX * TileSize, cntY * TileSize, (cntX + 1) * TileSize + 1, (cntY + 1) * TileSize + 1);
+				DeleteObject (Color);
+
+			}
+		}
+
+		//BLOCK 출력
+		for ( int cntY = 0; cntY < MaxMapY; cntY++ )
+		{
+			for ( int cntX = 0; cntX < MaxMapX; cntX++ )
+			{
+				if ( !Astar.TileSearch (cntX, cntY) )
 				{
 					Rectangle (hdc, cntX * TileSize, cntY * TileSize, (cntX + 1) * TileSize + 1, (cntY + 1) * TileSize + 1);
 				}
 			}
 		}
 
+
 		//OpenList검색
 		SelectObject (hdc, Open);
-		for ( int cnt = 0; cnt < OpenListNum; cnt++ )
+		multiset<JPS::Node *>::iterator IterOpen;
+		for ( IterOpen = Astar.OpenList.begin (); IterOpen != Astar.OpenList.end (); IterOpen++ )
 		{
-			if ( OpenList[cnt].F != NULL )
-			{
-				int X = OpenList[cnt].p->X;
-				int Y = OpenList[cnt].p->Y;
-				Rectangle (hdc, X *TileSize, Y*TileSize, (X + 1) *TileSize + 1, (Y + 1) *TileSize + 1);
-			}
+			JPS::Node *p = *IterOpen;
+			int X = p->X;
+			int Y = p->Y;
+			Rectangle (hdc, X *TileSize, Y*TileSize, (X + 1) *TileSize + 1, (Y + 1) *TileSize + 1);
 		}
 
 		//CloseList검색
 		SelectObject (hdc, Close);
-		for ( int cntY = 0; cntY < MaxMapY; cntY++ )
+		multiset<JPS::Node *>::iterator IterClose;
+		for ( IterClose = Astar.CloseList.begin (); IterClose != Astar.CloseList.end (); IterClose++ )
 		{
-			for ( int cntX = 0; cntX < MaxMapX; cntX++ )
-			{
-				if ( CloseList[cntY][cntX] != NULL )
-				{
-					int X = CloseList[cntY][cntX]->X;
-					int Y = CloseList[cntY][cntX]->Y;
-					Rectangle (hdc, X *TileSize, Y*TileSize, (X + 1) *TileSize + 1, (Y + 1) *TileSize + 1);
-				}
-			}
+			JPS::Node *p = *IterClose;
+			int X = p->X;
+			int Y = p->Y;
+			Rectangle (hdc, X *TileSize, Y*TileSize, (X + 1) *TileSize + 1, (Y + 1) *TileSize + 1);
 		}
 		
+
 		//시작점 표시
 		if ( MarkerStart )
 		{
@@ -309,7 +322,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		SelectObject (hdc, RED);
 		if ( FindEnd != nullptr )
 		{
-			AStar::Node *buffer = FindEnd;
+			JPS::Node *buffer = FindEnd;
 			MoveToEx (hdc, (FindEnd->X) * TileSize + (TileSize / 2), (FindEnd->Y) *TileSize + (TileSize / 2), NULL);
 			while ( FindEnd->Parent != NULL )
 			{
@@ -338,10 +351,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_RBUTTONDBLCLK:
 		PathFinding = true;
-		Star.PathFind (StartX, StartY, EndX, EndY, true);
+		Astar.Jump (StartX, StartY, EndX, EndY, true);
 		break;
 	case WM_LBUTTONDOWN:
-		if ( Map[HIWORD (lParam) / TileSize][LOWORD (lParam) / TileSize] == BLOCK )
+		if ( !Astar.TileSearch (LOWORD (lParam) / TileSize, HIWORD (lParam) / TileSize) )
 		{
 			LMouseDOWNCLEAR = true;
 		}
@@ -362,11 +375,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			if ( true == LMouseDOWNBLOCK )
 			{
-				Star.GetMapTileSet (LOWORD (lParam), HIWORD (lParam), BLOCK);
+				Astar.MapTileSet (X, Y, BLOCK);
 			}
 			else if ( true == LMouseDOWNCLEAR )
 			{
-				Star.GetMapTileSet (LOWORD (lParam), HIWORD (lParam), ROAD);
+				Astar.MapTileSet (X, Y, ROAD);
 			}
 		}
 		break;

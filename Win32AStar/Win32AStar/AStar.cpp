@@ -1,7 +1,6 @@
 #include"stdafx.h"
 #include"AStar.h"
-
-
+#include<set>
 
 int Map[MaxMapY][MaxMapX];
 
@@ -9,20 +8,13 @@ int Map[MaxMapY][MaxMapX];
 AStar::SearchNode OpenList[OpenListNum];
 AStar::Node *CloseList[MaxMapY][MaxMapX];
 
-void AStar::GetMapTileSet (int PosX, int PosY, Tile Name)
+void AStar::SetMapBlockSet (int PosX, int PosY, Tile Name)
 {
-	int TileNumX;
-	int TileNumY;
-
-
-	TileNumX = PosX / TileSize;
-	TileNumY = PosY / TileSize;
-
-	if ( TileNumX <= 0 || TileNumX > MaxMapX )
+	if ( PosX <= 0 || PosX > MaxMapX )
 	{
 		return;
 	}
-	if ( TileNumY <= 0 || TileNumY > MaxMapY )
+	if ( PosY <= 0 || PosY > MaxMapY )
 	{
 		return;
 	}
@@ -31,10 +23,10 @@ void AStar::GetMapTileSet (int PosX, int PosY, Tile Name)
 	switch ( Name )
 	{
 	case ROAD:
-		Map[TileNumY][TileNumX] = ROAD;
+		Map[PosY][PosX] = ROAD;
 		break;
 	case BLOCK:
-		Map[TileNumY][TileNumX] = BLOCK;
+		Map[PosY][PosX] = BLOCK;
 		break;
 	}
 	return;
