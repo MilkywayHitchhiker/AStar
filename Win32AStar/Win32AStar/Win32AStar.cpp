@@ -181,7 +181,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		PEN = CreatePen (PS_SOLID, 1, RGB (128, 128, 128));
 		RED = CreatePen (PS_SOLID, 2, RGB (255, 51, 51));
-		SetTimer (hWnd, 1, 150, NULL);
+		SetTimer (hWnd, 1, 1000, NULL);
 		break;
     case WM_COMMAND:
         {
@@ -215,7 +215,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					PathFinding = false;
 				}
 			}
-			InvalidateRect (hWnd, NULL, TRUE);
+			InvalidateRect (hWnd, NULL, false);
 			Sleep (0);
 			break;
 		}
@@ -249,26 +249,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			for ( int cntX = 0; cntX < MaxMapX; cntX++ )
 			{
-				Color = CreateSolidBrush (Astar.Map[cntY][cntX].rgb);
-				( HBRUSH )SelectObject (hdc, Color);
-				Rectangle (hdc, cntX * TileSize, cntY * TileSize, (cntX + 1) * TileSize + 1, (cntY + 1) * TileSize + 1);
-				DeleteObject (Color);
+
+				if ( !Astar.TileSearch (cntX, cntY) )
+				{
+					OldBrush = ( HBRUSH )SelectObject (hdc, block);
+					Rectangle (hdc, cntX * TileSize, cntY * TileSize, (cntX + 1) * TileSize + 1, (cntY + 1) * TileSize + 1);
+				}
+				else
+				{
+					Color = CreateSolidBrush (Astar.Map[cntY][cntX].rgb);
+					( HBRUSH )SelectObject (hdc, Color);
+					Rectangle (hdc, cntX * TileSize, cntY * TileSize, (cntX + 1) * TileSize + 1, (cntY + 1) * TileSize + 1);
+					DeleteObject (Color);
+				}
+
+
 
 			}
 		}
 
 		//BLOCK 출력
+
 		for ( int cntY = 0; cntY < MaxMapY; cntY++ )
 		{
 			for ( int cntX = 0; cntX < MaxMapX; cntX++ )
 			{
-				if ( !Astar.TileSearch (cntX, cntY) )
-				{
-					Rectangle (hdc, cntX * TileSize, cntY * TileSize, (cntX + 1) * TileSize + 1, (cntY + 1) * TileSize + 1);
-				}
+
 			}
 		}
-
 
 		//OpenList검색
 		SelectObject (hdc, Open);
@@ -292,6 +300,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			Rectangle (hdc, X *TileSize, Y*TileSize, (X + 1) *TileSize + 1, (Y + 1) *TileSize + 1);
 		}
 		
+
+
 
 		//시작점 표시
 		if ( MarkerStart )
@@ -331,6 +341,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			FindEnd = buffer;
 		}
+
 
 		SelectObject (hdc, OldBrush);
 		SelectObject (hdc, OldPEN);

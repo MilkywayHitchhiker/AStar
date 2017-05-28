@@ -7,6 +7,14 @@
 
 bool JPS::TileSearch (int X, int Y)
 {
+	if ( X < 0 || X >= _MaxX )
+	{
+		return false;
+	}
+	if ( Y < 0 || Y >= _MaxY )
+	{
+		return false;
+	}
 	if ( Map[Y][X].BLOCK == ROAD )
 	{
 		return true;
@@ -106,6 +114,15 @@ JPS::Node *JPS::Jump (int StartX, int StartY, int EndX, int EndY, bool First)
 	{
 		OpenList_Delete ();
 		CloseList_Delete ();
+		for ( int cntY = 0; cntY < _MaxY; cntY++ )
+		{
+			for ( int cntX = 0; cntX < _MaxX; cntX++ )
+			{
+				Map[cntY][cntX].rgb = RGB (255, 255, 255);
+			}
+		}
+
+
 
 		_StartX = StartX;
 		_StartY = StartY;
@@ -464,15 +481,6 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 		{
 			return false;
 		}
-		//현재 위치가 맵 좌표를 벗어나면 그대로 종료
-		if ( X < 0 || X >= _MaxX )
-		{
-			return false;
-		}
-		if ( Y < 0 || Y >= _MaxY )
-		{
-			return false;
-		}
 
 		if ( X == _EndX && Y == _EndY )
 		{
@@ -488,7 +496,7 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 		switch ( iDir )
 		{
 		case MOVE_UU :
-			//왼쪽 타일 조사 블럭일경우 true
+			//왼쪽 타일 조사 블럭일경우 false
 			if ( !TileSearch (X - 1, Y) )
 			{
 				//왼쪽타일이 블럭일 경우 바로 그 윗타일 조사 블럭이 아닐경우 현재위치 반환
@@ -499,7 +507,7 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 					return true;
 				}
 			}
-			//오른쪽 타일 조사 블럭일경우 true
+			//오른쪽 타일 조사 블럭일경우 false
 			if ( !TileSearch (X + 1, Y) )
 			{
 				//오른쪽타일이 블럭일 경우 바로 그 윗타일 조사 블럭이 아닐경우 현재위치 반환
@@ -516,7 +524,7 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 			break;
 
 		case MOVE_RR :
-			//윗 타일 조사 블럭일경우 true
+			//윗 타일 조사 블럭일경우 false
 			if ( !TileSearch (X, Y - 1) )
 			{
 				//윗 타일이 블럭일 경우 바로 그 다음타일 조사 블럭이 아닐경우 현재위치 반환
@@ -527,7 +535,7 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 					return true;
 				}
 			}
-			//아래 타일 조사 블럭일경우 true
+			//아래 타일 조사 블럭일경우 false
 			if ( !TileSearch (X , Y + 1) )
 			{
 				//아래쪽타일이 블럭일 경우 바로 그 다음타일 조사 블럭이 아닐경우 현재위치 반환
@@ -544,7 +552,7 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 			break;
 
 		case MOVE_DD :
-			//왼쪽 타일 조사 블럭일경우 true
+			//왼쪽 타일 조사 블럭일경우 false
 			if ( !TileSearch (X - 1, Y) )
 			{
 				//왼쪽타일이 블럭일 경우 바로 그 아래타일 조사 블럭이 아닐경우 현재위치 반환
@@ -555,7 +563,7 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 					return true;
 				}
 			}
-			//오른쪽 타일 조사 블럭일경우 true
+			//오른쪽 타일 조사 블럭일경우 false
 			if ( !TileSearch (X + 1, Y) )
 			{
 				//오른쪽타일이 블럭일 경우 바로 그 아래타일 조사 블럭이 아닐경우 현재위치 반환
@@ -573,7 +581,7 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 
 		case MOVE_LL :
 
-			//윗 타일 조사 블럭일경우 true
+			//윗 타일 조사 블럭일경우 false
 			if ( !TileSearch (X, Y - 1) )
 			{
 				//윗 타일이 블럭일 경우 바로 그 앞타일 조사 블럭이 아닐경우 현재위치 반환
@@ -584,7 +592,7 @@ bool JPS::MoveStright (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 					return true;
 				}
 			}
-			//아래 타일 조사 블럭일경우 true
+			//아래 타일 조사 블럭일경우 false
 			if ( !TileSearch (X, Y + 1) )
 			{
 				//아래쪽타일이 블럭일 경우 바로 그 앞타일 조사 블럭이 아닐경우 현재위치 반환
@@ -618,16 +626,6 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 		{
 			return false;
 		}
-		//현재 위치가 맵 좌표를 벗어나면 그대로 종료
-		if ( X < 0 || X >= _MaxX )
-		{
-			return false;
-		}
-		if ( Y < 0 || Y >= _MaxY )
-		{
-			return false;
-		}
-
 		//현재 체크한 타일에 컬러 설정
 		MapColorSet (X, Y, TileColor);
 		if ( X == _EndX && Y == _EndY )
@@ -652,7 +650,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 				}
 			}
 			//왼쪽 타일 블럭이 아니므로 왼쪽 타일로 위로 직선 검사
-			if ( MoveStright (X - 1, Y, MOVE_UU, &checkX, &checkY) )
+			if ( MoveStright (X, Y, MOVE_UU, &checkX, &checkY) )
 			{
 				*JumpX = X;
 				*JumpY = Y;
@@ -670,7 +668,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 				}
 			}
 			//아래쪽 타일 블럭이 아니므로 오른쪽 타일로 위로 직선 검사
-			if ( MoveStright (X, Y + 1, MOVE_RR, &checkX, &checkY) )
+			if ( MoveStright (X, Y, MOVE_RR, &checkX, &checkY) )
 			{
 				*JumpX = X;
 				*JumpY = Y;
@@ -697,7 +695,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 				}
 			}
 			//위쪽 타일 블럭이 아니므로 오른쪽 타일로 직선 검사
-			if ( MoveStright (X, Y - 1, MOVE_RR, &checkX, &checkY) )
+			if ( MoveStright (X, Y, MOVE_RR, &checkX, &checkY) )
 			{
 				*JumpX = X;
 				*JumpY = Y;
@@ -716,7 +714,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 				}
 			}
 			//아래쪽 타일 블럭이 아니므로 아래쪽 타일로 직선 검사
-			if ( MoveStright (X - 1, Y , MOVE_DD, &checkX, &checkY) )
+			if ( MoveStright (X, Y , MOVE_DD, &checkX, &checkY) )
 			{
 				*JumpX = X;
 				*JumpY = Y;
@@ -741,7 +739,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 					return true;
 				}
 			}
-			if ( MoveStright (X, Y - 1, MOVE_LL, &checkX, &checkY) )
+			if ( MoveStright (X, Y, MOVE_LL, &checkX, &checkY) )
 			{
 				*JumpX = X;
 				*JumpY = Y;
@@ -760,7 +758,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 					return true;
 				}
 			}
-			if ( MoveStright (X + 1, Y , MOVE_DD, &checkX, &checkY) )
+			if ( MoveStright (X, Y , MOVE_DD, &checkX, &checkY) )
 			{
 				*JumpX = X;
 				*JumpY = Y;
@@ -785,7 +783,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 					return true;
 				}
 			}
-			if ( MoveStright (X + 1, Y, MOVE_UU, &checkX, &checkY) )
+			if ( MoveStright (X, Y, MOVE_UU, &checkX, &checkY) )
 			{
 				*JumpX = X;
 				*JumpY = Y;
@@ -802,7 +800,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 					return true;
 				}
 			}
-			if ( MoveStright (X, Y + 1, MOVE_LL, &checkX, &checkY) )
+			if ( MoveStright (X, Y, MOVE_LL, &checkX, &checkY) )
 			{
 				*JumpX = X;
 				*JumpY = Y;
