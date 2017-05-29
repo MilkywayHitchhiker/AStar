@@ -621,7 +621,7 @@ bool JPS::Movediagonal (int X, int Y, Move iDir, int *JumpX, int *JumpY)
 	int checkY;
 	while ( 1 )
 	{
-		//현재 맵의 X,Y좌표가 블럭이라면 그대로 종료.
+		//현재 맵의 X,Y좌표가 블럭혹은 맵의 끝이 라면 그대로 종료.
 		if ( !TileSearch (X, Y) )
 		{
 			return false;
